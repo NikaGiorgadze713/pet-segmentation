@@ -1,24 +1,24 @@
+import random
+
 import numpy as np
 import torch
-from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data import Dataset, DataLoader, Subset
 from torchvision.datasets import OxfordIIITPet
 import torchvision.transforms.functional as TF
 
 IMG_SIZE = 256
-# Average color values of ImageNet photos (used to normalize)
 MEAN = [0.485, 0.456, 0.406]
 STD = [0.229, 0.224, 0.225]
 
 
 class PetSegmentation(Dataset):
-    """Returns (image, mask) pairs ready for the model."""
-
-    def __init__(self, root="data", split="trainval", img_size=IMG_SIZE):
+    def __init__(self, root="data", split="trainval", img_size=IMG_SIZE, augment=False):
         self.base = OxfordIIITPet(
             root=root, split=split,
             target_types="segmentation", download=True,
         )
         self.img_size = img_size
+        self.augment = augment
 
     def __len__(self):
         return len(self.base)
@@ -26,34 +26,39 @@ class PetSegmentation(Dataset):
     def __getitem__(self, idx):
         image, trimap = self.base[idx]
 
-        # 1. Resize both to the same size
         image = TF.resize(image, [self.img_size, self.img_size])
         trimap = TF.resize(
             trimap, [self.img_size, self.img_size],
             interpolation=TF.InterpolationMode.NEAREST,
         )
 
-        # 2. Photo -> tensor [3, H, W] with values 0..1
+        if self.augment:
+            if random.random() < 0.5:
+                image = TF.hflip(image)
+                trimap = TF.hflip(trimap)
+            image = TF.adjust_brightness(image, random.uniform(0.8, 1.2))
+            image = TF.adjust_contrast(image, random.uniform(0.8, 1.2))
+
         image = TF.to_tensor(image)
-        # 3. Normalize
         image = TF.normalize(image, MEAN, STD)
 
-        # 4. Mask: 1 = pet, 2 = background, 3 = border
-        #    -> pet and border become 1, background becomes 0
         trimap = torch.from_numpy(np.array(trimap))
-        mask = (trimap != 2).float().unsqueeze(0)  # shape [1, H, W]
+        mask = (trimap != 2).float().unsqueeze(0)
 
         return image, mask
 
 
-def get_dataloaders(root="data", batch_size=16, val_fraction=0.1, seed=42):
-    full = PetSegmentation(root, split="trainval")
-    n_val = int(len(full) * val_fraction)
-    n_train = len(full) - n_val
-    train_ds, val_ds = random_split(
-        full, [n_train, n_val],
-        generator=torch.Generator().manual_seed(seed),
-    )
+def get_dataloaders(root="data", batch_size=16, val_fraction=0.1, seed=42, augment=False):
+    train_full = PetSegmentation(root, split="trainval", augment=augment)
+    val_full = PetSegmentation(root, split="trainval", augment=False)
+
+    n = len(train_full)
+    n_val = int(n * val_fraction)
+    n_train = n - n_val
+    perm = torch.randperm(n, generator=torch.Generator().manual_seed(seed)).tolist()
+    train_ds = Subset(train_full, perm[:n_train])
+    val_ds = Subset(val_full, perm[n_train:])
+
     test_ds = PetSegmentation(root, split="test")
 
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=2)
