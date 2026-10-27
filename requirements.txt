@@ -1,0 +1,8 @@
+torch
+torchvision
+segmentation-models-pytorch
+onnx
+onnxruntime
+numpy
+pandas
+matplotlib
