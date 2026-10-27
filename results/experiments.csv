@@ -1,0 +1,5 @@
+experiment,model,loss,augment,epochs,lr,params_M,best_val_iou,best_val_dice,train_minutes
+unet_scratch_bce,unet_scratch,bce,False,5,0.001,7.76,0.7611,0.8564,6.6
+unet_resnet34_bce,unet_resnet34,bce,False,5,0.0001,24.44,0.9052,0.9478,4.5
+unet_resnet34_bce_dice,unet_resnet34,bce_dice,False,5,0.0001,24.44,0.9051,0.9477,4.5
+unet_resnet34_bce_dice_aug,unet_resnet34,bce_dice,True,5,0.0001,24.44,0.9054,0.9478,4.5

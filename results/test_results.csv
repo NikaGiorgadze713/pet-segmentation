@@ -1,0 +1,5 @@
+experiment,test_iou,test_dice,test_images
+unet_scratch_bce,0.7669,0.8596,3669
+unet_resnet34_bce,0.9044,0.9472,3669
+unet_resnet34_bce_dice,0.9075,0.949,3669
+unet_resnet34_bce_dice_aug,0.9071,0.9486,3669

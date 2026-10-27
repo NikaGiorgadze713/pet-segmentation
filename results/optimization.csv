@@ -1,0 +1,7 @@
+version,size_mb,cpu_ms_per_image,test_iou
+resnet34 pytorch fp32,97.9,212.7,0.8969
+resnet34 onnx fp32,97.7,149.6,0.8969
+resnet34 onnx int8,24.7,104.7,0.8697
+mobilenet pytorch fp32,26.8,111.9,0.8985
+mobilenet onnx fp32,26.5,73.0,0.8985
+mobilenet onnx int8,7.1,59.0,0.8517

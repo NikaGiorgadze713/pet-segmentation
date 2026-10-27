@@ -1,0 +1,7 @@
+onnxruntime
+numpy
+pillow
+fastapi
+uvicorn
+python-multipart
+gradio
