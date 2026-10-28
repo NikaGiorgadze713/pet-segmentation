@@ -1,0 +1,10 @@
+trainval images: 3680
+test images: 3669
+cats: 1188, dogs: 2492
+width min/median/max: 114 / 500 / 3264
+height min/median/max: 108 / 375 / 2606
+pet pixel fraction mean: 0.414
+pet pixel fraction min/max: 0.000 / 0.986
+empty masks (no pet pixels) in trainval: 7
+empty masks (no pet pixels) in test: 7
+trimap values: 1 = pet, 2 = background, 3 = border
